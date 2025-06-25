@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Wheel of Life Activity</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: url("background.jpg") no-repeat center center fixed;
+      background-size: cover;
+    }
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    .sliders {
+      display: flex;
+      flex-direction: column;
+      max-width: 600px;
+      margin: auto;
+    }
+    .slider-row {
+      display: flex;
+      align-items: center;
+      margin: 10px 0;
+    }
+    label {
+      width: 150px;
+    }
+    input[type="range"] {
+      flex: 1;
+      margin: 0 10px;
+    }
+    .value-display {
+      width: 30px;
+      text-align: center;
+    }
+    .result {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 40px;
+    }
+    .legend {
+      margin-left: 40px;
+      max-width: 300px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .color-box {
+      width: 20px;
+      height: 20px;
+      margin-right: 10px;
+    }
+    button {
+      margin: 30px auto;
+      display: block;
+      padding: 10px 20px;
+      background-color: #27ae60;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    canvas {
+      max-width: 400px;
+    }
+    .wheel-image {
+      display: block;
+      margin: 30px auto;
+      max-width: 400px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>✨ Wheel of Life Activity</h1>
+
+<img src="WOL.jpg" alt="Wheel of Life Diagram" class="wheel-image" />
+
+<div class="sliders" id="slidersContainer"></div>
+
+<button onclick="generateChart()">Show My Life Balance</button>
+
+<div class="result">
+  <canvas id="wheelChart"></canvas>
+  <div class="legend" id="legendContainer"></div>
+</div>
+
+<script>
+  const keys = [
+    { name: "Health", color: "#e74c3c" },
+    { name: "Career", color: "#f39c12" },
+    { name: "Finance", color: "#f1c40f" },
+    { name: "Relationships", color: "#2ecc71" },
+    { name: "Personal Growth", color: "#1abc9c" },
+    { name: "Fun & Recreation", color: "#3498db" },
+    { name: "Spirituality", color: "#9b59b6" },
+    { name: "Contribution", color: "#34495e" }
+  ];
+
+  const ratings = {};
+
+  function createSliders() {
+    const container = document.getElementById('slidersContainer');
+    keys.forEach((key, index) => {
+      const row = document.createElement('div');
+      row.className = 'slider-row';
+      row.innerHTML = '<label for="key' + index + '">' + key.name + '</label>' +
+        '<input type="range" id="key' + index + '" min="1" max="10" value="0" oninput="updateRating(' + index + ', this.value)">' +
+        '<span class="value-display" id="value' + index + '">0</span>';
+      container.appendChild(row);
+      ratings[key.name] = 0;
+    });
+  }
+
+  function updateRating(index, value) {
+    ratings[keys[index].name] = parseInt(value);
+    document.getElementById(`value${index}`).innerText = value;
+  }
+
+  let chart;
+
+  function generateChart() {
+    const data = keys.map(k => ratings[k.name]);
+    const labels = keys.map(k => k.name);
+    const backgroundColors = keys.map(k => k.color);
+
+    const ctx = document.getElementById('wheelChart').getContext('2d');
+
+    if (chart) chart.destroy();
+
+    chart = new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: data,
+          backgroundColor: backgroundColors
+        }]
+      },
+      options: {
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
+
+    generateLegend();
+  }
+
+  function generateLegend() {
+    const legend = document.getElementById('legendContainer');
+    legend.innerHTML = '';
+    keys.forEach(key => {
+      const item = document.createElement('div');
+      item.className = 'legend-item';
+      item.innerHTML = `
+        <div class="color-box" style="background-color: ${key.color}"></div>
+        <span><strong>${key.name}</strong>: ${ratings[key.name]}</span>
+      `;
+      legend.appendChild(item);
+    });
+  }
+
+  createSliders();
+</script>
+
+</body>
+</html>
